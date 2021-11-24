@@ -12,7 +12,6 @@ description = "Provides the DATEV format types including some serialization."
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-wasm-bindgen = "0.2"
 validator = { version = "0.14", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 csv = "1.1"

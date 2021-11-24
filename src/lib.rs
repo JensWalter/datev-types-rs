@@ -1,4 +1,3 @@
-use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize,de::Deserializer};
 use serde::ser::Serializer;
 use validator::Validate;
@@ -8,7 +7,6 @@ use std::fmt::Formatter;
 #[macro_use]
 extern crate lazy_static;
 
-#[wasm_bindgen]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Buchungsstapel{
     header: Header,
@@ -40,7 +38,6 @@ lazy_static! {
     static ref FORMATNAME: Regex = Regex::new(r#"^(Buchungsstapel|Wiederkehrende Buchungen|Debitoren/Kreditoren|Sachkontenbeschriftungen|Zahlungsbedingungen|Diverse Adressen)$"#).unwrap();
 }
 
-#[wasm_bindgen]
 #[derive(Clone, Debug, PartialEq, Eq, Validate, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Header{
@@ -218,6 +215,24 @@ impl Display for Header{
     }
 }
 
+
+impl TryFrom<&str> for Header {
+    type Error = &'static str;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let mut rdr = csv::ReaderBuilder::new().delimiter(b';')
+            .has_headers(false).from_reader(value.as_bytes());
+        let mut iter = rdr.deserialize();
+        if let Some(result) = iter.next() {
+            let header: Header = result.unwrap();
+            header.validate().unwrap();
+            Ok(header)
+        }else{
+            Err("Header not found")
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Debug, Eq)]
 pub enum Festschreibung{
     KeineFestschreibung,
@@ -261,16 +276,6 @@ impl Display for Festschreibung{
     }
 }
 
-#[wasm_bindgen]
-impl Buchungsstapel {
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Buchungsstapel {
-        Buchungsstapel { ..Default::default() }
-    }
-
-}
-
-#[wasm_bindgen]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Validate)]
 pub struct Buchung{
     /// Umsatz/Betrag für den Datensatz
@@ -681,40 +686,42 @@ impl Display for Buchung{
     }
 }
 
-#[wasm_bindgen]
 #[allow(non_camel_case_types)]
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct GP_Stamm{
-    x: String,
-    t: String,
+pub struct DebKred_Stamm{
+    header: Header,
+    debitoren_kreditoren: Vec<DebKred>,
+}
+
+#[allow(non_camel_case_types)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DebKred {
+    konto: u32,
 }
 
 #[test]
 fn valid_header() {
     let str = r#""EXTF";510;21;"Buchungsstapel";7;20211106165314647;;"";"";"";1000;1;20190101;4;20190101;20191231;"";"";;;;"";;"";;;"";;;"";"""#;
     
-    let mut rdr = csv::ReaderBuilder::new().delimiter(b';')
-        .has_headers(false).from_reader(str.as_bytes());
-    let mut iter = rdr.deserialize();
-    if let Some(result) = iter.next() {
-        let header: Header = result.unwrap();
-        header.validate().unwrap();
-        assert_eq!(header.kennzeichen, "EXTF");
-        assert_eq!(header.versionsnummer, 510);
-        assert_eq!(header.format_kategorie, 21);
-        assert_eq!(header.format_name, "Buchungsstapel");
-        assert_eq!(header.format_version, 7);
-        assert_eq!(header.erzeugt_am, 20211106165314647);
-        assert_eq!(header.beraternummer, 1000);
-        assert_eq!(header.mandantennummer, 1);
-        assert_eq!(header.wj_beginn, 20190101);
-        assert_eq!(header.sachkontenlänge, 4);
-        assert_eq!(header.datum_von, 20190101);
-        assert_eq!(header.datum_bis, 20191231);
-        assert_eq!(header.buchungstyp, None);
-        assert_eq!(header.rechnungslegungszweck, None);
-        assert_eq!(header.festschreibung, Festschreibung::default());
-    }
+    let result = Header::try_from(str);
+    assert!(result.is_ok());
+    let header = result.unwrap();
+    header.validate().unwrap();
+    assert_eq!(header.kennzeichen, "EXTF");
+    assert_eq!(header.versionsnummer, 510);
+    assert_eq!(header.format_kategorie, 21);
+    assert_eq!(header.format_name, "Buchungsstapel");
+    assert_eq!(header.format_version, 7);
+    assert_eq!(header.erzeugt_am, 20211106165314647);
+    assert_eq!(header.beraternummer, 1000);
+    assert_eq!(header.mandantennummer, 1);
+    assert_eq!(header.wj_beginn, 20190101);
+    assert_eq!(header.sachkontenlänge, 4);
+    assert_eq!(header.datum_von, 20190101);
+    assert_eq!(header.datum_bis, 20191231);
+    assert_eq!(header.buchungstyp, None);
+    assert_eq!(header.rechnungslegungszweck, None);
+    assert_eq!(header.festschreibung, Festschreibung::default());
 }
 
 #[test]
@@ -752,13 +759,10 @@ fn full_cycle_header() {
 #[should_panic]
 fn invalid_header() {
     let str = r#""INVALIDFORMAT";510;21;"Buchungsstapel";7;20211106165314647;;"";"";"";1000;1;20190101;4;20190101;20191231;"";"";;;;"";;"";;;"";;;"";"""#;
-    let mut rdr = csv::ReaderBuilder::new().delimiter(b';')
-    .has_headers(false).from_reader(str.as_bytes());
-    let mut iter = rdr.deserialize();
-    if let Some(result) = iter.next() {
-        let header: Header = result.unwrap();
-        header.validate().unwrap();
-    }
+    let result = Header::try_from(str);
+    assert!(result.is_ok());
+    let header = result.unwrap();
+    header.validate().unwrap();
 }
 
 #[test]
@@ -791,5 +795,5 @@ fn einzelbuchung() {
         header: header,
         buchungen: vec![buchung],
     };
-    let str = format!("{}", stapel);
+    let _str = format!("{}", stapel);
 }
