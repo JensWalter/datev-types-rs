@@ -7,7 +7,7 @@ use std::fmt::Formatter;
 #[macro_use]
 extern crate lazy_static;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Validate, Serialize, Deserialize)]
 pub struct Buchungsstapel{
     header: Header,
     buchungen: Vec<Buchung>,
@@ -24,12 +24,56 @@ impl Default for Buchungsstapel{
 
 impl Display for Buchungsstapel{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut buchungen_str = "".to_string();
+        f.write_str(&format!("{}\n",self.header))?;
         for buchung in &self.buchungen {
-            buchungen_str.push_str(format!("{}\n", buchung).as_str());
+            buchung.fmt(f)?;
+            // f.write_str(&format!("{}\n", buchung))?;
         }
-        write!(f, "{}\n{}", self.header, buchungen_str)
+        Ok(())
+        // write!(f, "{}\n{}", self.header, buchungen_str)       
+    }
+}
+
+impl TryFrom<&str> for Buchungsstapel {
+    type Error = &'static str;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let split;
+        if value.contains("\r\n") {
+            split = value.split("\r\n");
+        }else{
+            split = value.split("\n");
+        }
+        let vec: Vec<&str> = split.collect();
         
+        let mut rdr = csv::ReaderBuilder::new().delimiter(b';')
+            .has_headers(false).from_reader(vec.get(0).unwrap().as_bytes());
+        let mut iter = rdr.deserialize();
+        let mut header: Header = Header::default();
+        if let Some(result) = iter.next() {
+            header = result.unwrap();
+            header.validate().unwrap();
+        }
+        let input = vec.get(2).unwrap();
+        let input2: String = input.to_string();
+        let input3: String = input2.replace(',',".");
+        let mut rdr = csv::ReaderBuilder::new().delimiter(b';')
+            .has_headers(false).from_reader(input3.as_bytes());
+        let mut iter = rdr.deserialize();
+        let mut buchungen: Vec<Buchung> = Vec::new();
+        if let Some(result) = iter.next() {
+            let b: Buchung = result.unwrap();
+            b.validate().unwrap();
+            buchungen.push(b);
+        }
+        let stapel = Buchungsstapel{
+            header,
+            buchungen,
+        };
+        Ok(stapel)
+        // }else{
+        //     Err("Header not found")
+        // }
     }
 }
 
@@ -179,7 +223,7 @@ impl Display for Header{
             None => "0",
             _ => "0",
         };
-        write!(f, r#""{kennzeichen}";{versionsnummer};{format_kategorie};"{format_name}";{format_version};{erzeugt_am};{leerfeld1};{leerfeld2};{leerfeld3};{leerfeld4};{beraternummer};{mandantennummer};{wj_beginn};{sachkontenlänge};{datum_von};{datum_bis};{bezeichnung};{diktatkürzel};{buchungstyp};{rechnungslegungszweck};{buchungstyp};{rechnungslegungszweck};{festschreibung};{wkz};{leerfeld5};{derivatskennzeichen};{leerfeld6};{leerfeld7};{sachkontenrahmen};{id_der_branchenlösung};{leerfeld8};{leerfeld9};{anwendungsinformation}"#,
+        write!(f, r#""{kennzeichen}";{versionsnummer};{format_kategorie};"{format_name}";{format_version};{erzeugt_am};{leerfeld1};{leerfeld2};{leerfeld3};{leerfeld4};{beraternummer};{mandantennummer};{wj_beginn};{sachkontenlänge};{datum_von};{datum_bis};{bezeichnung};{diktatkürzel};{buchungstyp};{rechnungslegungszweck};{buchungstyp};{rechnungslegungszweck};{festschreibung};{wkz};{leerfeld5};{derivatskennzeichen};{leerfeld6};{leerfeld7};{sachkontenrahmen};{id_der_branchenlösung};{leerfeld8};{leerfeld9};{anwendungsinformation}\n"#,
             kennzeichen=self.kennzeichen,
             versionsnummer=self.versionsnummer,
             format_kategorie=self.format_kategorie,
@@ -214,7 +258,6 @@ impl Display for Header{
         )
     }
 }
-
 
 impl TryFrom<&str> for Header {
     type Error = &'static str;
@@ -556,7 +599,7 @@ impl Default for Buchung {
 
 impl Display for Buchung{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, r#"{umsatz};{soll_haben_kennzeichen};{wkz_umsatz};{kurs};{basis_umsatz};{wkz_basis_umsatz};{konto};{gegenkonto};{bu_schlüssel};{beleg_datum};{belegfeld1};{belegfeld2};{skonto};{buchungstext};{posten_sperre};{diverse_adressnummer};{geschäftspartner_bank};{sachverhalt};{zinssperre};{beleg_link};{beleg_info_art1};{beleg_info_inhalt1};{beleg_info_art2};{beleg_info_inhalt2};{beleg_info_art3};{beleg_info_inhalt3};{beleg_info_art4};{beleg_info_inhalt4};{beleg_info_art5};{beleg_info_inhalt5};{beleg_info_art6};{beleg_info_inhalt6};{beleg_info_art7};{beleg_info_inhalt7};{beleg_info_art8};{beleg_info_inhalt8};{kost1_kostenstelle};{kost2_kostenstelle};{kost_menge};{eu_ustid};{eu_steuersatz};{abweichende_versteuerungsart};{sachverhalt_l_l};{funktionsergänzung_l_l};{bu_49_hauptfunktiontyp};{bu_49_hauptfunktionsnummer};{bu_49_funktionsergänzung};{zusatzinformation_art1};{zusatzinformation_inhalt1};{zusatzinformation_art2};{zusatzinformation_inhalt2};{zusatzinformation_art3};{zusatzinformation_inhalt3};{zusatzinformation_art4};{zusatzinformation_inhalt4};{zusatzinformation_art5};{zusatzinformation_inhalt5};{zusatzinformation_art6};{zusatzinformation_inhalt6};{zusatzinformation_art7};{zusatzinformation_inhalt7};{zusatzinformation_art8};{zusatzinformation_inhalt8};{zusatzinformation_art9};{zusatzinformation_inhalt9};{zusatzinformation_art10};{zusatzinformation_inhalt10};{zusatzinformation_art11};{zusatzinformation_inhalt11};{zusatzinformation_art12};{zusatzinformation_inhalt12};{zusatzinformation_art13};{zusatzinformation_inhalt13};{zusatzinformation_art14};{zusatzinformation_inhalt14};{zusatzinformation_art15};{zusatzinformation_inhalt15};{zusatzinformation_art16};{zusatzinformation_inhalt16};{zusatzinformation_art17};{zusatzinformation_inhalt17};{zusatzinformation_art18};{zusatzinformation_inhalt18};{zusatzinformation_art19};{zusatzinformation_inhalt19};{zusatzinformation_art20};{zusatzinformation_inhalt20};{stück};{gewicht};{zahlweise};{forderungsart};{forderungsjahr};{veranlagungsjahr};{zugeordnete_fälligkeit};{skonto_typ};{auftragsnummer};{buchungstyp};{ust_schlüssel_anzahlung};{eu_mitgliedstaat_anzahlung};{sachverhalt_l_l_anzahlung};{eu_steuersatz_anzahlung};{erlöskonto_anzahlung};{herkunft_kz};{leerfeld};{kost_datum};{sepa_mandatsreferenz};{skontosperre};{gesellschaftername};{beteiligtennummer};{identifikationsnummer};{zeichennummer};{postensperre_bis};{bezeichnung_so_bil_sachverhalt};{kennzeichen_so_bil_buchung};{festschreibung};{leistungsdatum};{datum_zuord_steuerperiode};{fälligkeit};{generalumkehr};{steuersatz};{land};{abrechnungsreferenz};{bvv_position};{eu_ustid_ursprung};{eu_steuersatz_ursprung}"#,
+        write!(f, r#"{umsatz};{soll_haben_kennzeichen};{wkz_umsatz};{kurs};{basis_umsatz};{wkz_basis_umsatz};{konto};{gegenkonto};{bu_schlüssel};{beleg_datum};{belegfeld1};{belegfeld2};{skonto};{buchungstext};{posten_sperre};{diverse_adressnummer};{geschäftspartner_bank};{sachverhalt};{zinssperre};{beleg_link};{beleg_info_art1};{beleg_info_inhalt1};{beleg_info_art2};{beleg_info_inhalt2};{beleg_info_art3};{beleg_info_inhalt3};{beleg_info_art4};{beleg_info_inhalt4};{beleg_info_art5};{beleg_info_inhalt5};{beleg_info_art6};{beleg_info_inhalt6};{beleg_info_art7};{beleg_info_inhalt7};{beleg_info_art8};{beleg_info_inhalt8};{kost1_kostenstelle};{kost2_kostenstelle};{kost_menge};{eu_ustid};{eu_steuersatz};{abweichende_versteuerungsart};{sachverhalt_l_l};{funktionsergänzung_l_l};{bu_49_hauptfunktiontyp};{bu_49_hauptfunktionsnummer};{bu_49_funktionsergänzung};{zusatzinformation_art1};{zusatzinformation_inhalt1};{zusatzinformation_art2};{zusatzinformation_inhalt2};{zusatzinformation_art3};{zusatzinformation_inhalt3};{zusatzinformation_art4};{zusatzinformation_inhalt4};{zusatzinformation_art5};{zusatzinformation_inhalt5};{zusatzinformation_art6};{zusatzinformation_inhalt6};{zusatzinformation_art7};{zusatzinformation_inhalt7};{zusatzinformation_art8};{zusatzinformation_inhalt8};{zusatzinformation_art9};{zusatzinformation_inhalt9};{zusatzinformation_art10};{zusatzinformation_inhalt10};{zusatzinformation_art11};{zusatzinformation_inhalt11};{zusatzinformation_art12};{zusatzinformation_inhalt12};{zusatzinformation_art13};{zusatzinformation_inhalt13};{zusatzinformation_art14};{zusatzinformation_inhalt14};{zusatzinformation_art15};{zusatzinformation_inhalt15};{zusatzinformation_art16};{zusatzinformation_inhalt16};{zusatzinformation_art17};{zusatzinformation_inhalt17};{zusatzinformation_art18};{zusatzinformation_inhalt18};{zusatzinformation_art19};{zusatzinformation_inhalt19};{zusatzinformation_art20};{zusatzinformation_inhalt20};{stück};{gewicht};{zahlweise};{forderungsart};{forderungsjahr};{veranlagungsjahr};{zugeordnete_fälligkeit};{skonto_typ};{auftragsnummer};{buchungstyp};{ust_schlüssel_anzahlung};{eu_mitgliedstaat_anzahlung};{sachverhalt_l_l_anzahlung};{eu_steuersatz_anzahlung};{erlöskonto_anzahlung};{herkunft_kz};{leerfeld};{kost_datum};{sepa_mandatsreferenz};{skontosperre};{gesellschaftername};{beteiligtennummer};{identifikationsnummer};{zeichennummer};{postensperre_bis};{bezeichnung_so_bil_sachverhalt};{kennzeichen_so_bil_buchung};{festschreibung};{leistungsdatum};{datum_zuord_steuerperiode};{fälligkeit};{generalumkehr};{steuersatz};{land};{abrechnungsreferenz};{bvv_position};{eu_ustid_ursprung};{eu_steuersatz_ursprung}\n"#,
         umsatz = self.umsatz,
         soll_haben_kennzeichen = self.soll_haben_kennzeichen,
         wkz_umsatz = self.wkz_umsatz,
@@ -796,4 +839,23 @@ fn einzelbuchung() {
         buchungen: vec![buchung],
     };
     let _str = format!("{}", stapel);
+}
+
+#[test]
+fn test_extf_buchungstapel() {
+    use std::io::Read;
+    let mut f = std::fs::File::open("./test-data/EXTF_Buchungsstapel.csv").unwrap();
+    let mut buffer = Vec::new();
+    f.read_to_end(&mut buffer).unwrap();
+    //length in windows encoding
+    assert_eq!(buffer.len(), 21426);
+    let (cow, encoding_used, had_errors) = encoding_rs::WINDOWS_1252.decode(&buffer);
+    assert_eq!(had_errors, false);
+    assert_eq!(encoding_used, encoding_rs::WINDOWS_1252);
+    //length in utf-8 encoding
+    assert_eq!(cow.len(), 21447);
+    let str: String = cow.to_string();
+    println!("{}", str);
+    println!("done.");
+    let _stapel: Buchungsstapel = Buchungsstapel::try_from(str.as_str()).unwrap();
 }
