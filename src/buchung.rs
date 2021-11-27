@@ -1,7 +1,5 @@
-use serde::{Serialize, Deserialize,de::Deserializer};
-use serde::ser::Serializer;
+use serde::{Serialize, Deserialize};
 use validator::Validate;
-use regex::Regex;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use crate::header::Festschreibung;
@@ -745,3 +743,434 @@ impl Display for Buchung{
         )      
     }
 }
+
+impl TryFrom<&str> for Buchung {
+    type Error = &'static str;
+  
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let mut rdr = csv::ReaderBuilder::new().delimiter(b';').flexible(true)
+            .has_headers(false).from_reader(value.as_bytes());
+
+        let mut iter = rdr.records();
+        if let Some(result) = iter.next() {
+            let record = result.unwrap();
+            let mut buchung = Buchung::default();
+            //add values
+            if let Some(val) = record.get(0) {
+                let fixed_decimal = val.replace(',', ".");
+                buchung.umsatz = fixed_decimal.parse().unwrap();
+            }
+            if let Some(val) = record.get(1) {
+                buchung.soll_haben_kennzeichen = val.to_string();
+            }
+            if let Some(val) = record.get(2) {
+                buchung.wkz_umsatz = val.to_string();
+            }
+            if let Some(val) = record.get(3) {
+                if !val.is_empty() {
+                    let fixed_decimal = val.replace(',', ".");
+                    buchung.kurs = Some(fixed_decimal.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(4) {
+                if !val.is_empty() {
+                    let fixed_decimal = val.replace(',', ".");
+                    buchung.basis_umsatz = Some(fixed_decimal.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(5) {
+                buchung.wkz_basis_umsatz = val.to_string();
+            }
+            if let Some(val) = record.get(6) {
+                buchung.konto = val.parse().unwrap();
+            }
+            if let Some(val) = record.get(7) {
+                buchung.gegenkonto = val.parse().unwrap();
+            }
+            if let Some(val) = record.get(8) {
+                if !val.is_empty() {
+                    buchung.bu_schlüssel = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(9) {
+                buchung.beleg_datum = val.parse().unwrap();
+            }
+            if let Some(val) = record.get(10) {
+                buchung.belegfeld1 = val.to_string();
+            }
+            if let Some(val) = record.get(11) {
+                buchung.belegfeld2 = val.to_string();
+            }
+            if let Some(val) = record.get(12) {
+                if !val.is_empty() {
+                    let fixed_decimal = val.replace(',', ".");
+                    buchung.skonto = Some(fixed_decimal.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(13) {
+                buchung.buchungstext = Some(val.to_string());
+            }
+            if let Some(val) = record.get(14) {
+                if !val.is_empty() {
+                    buchung.postensperre = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(15) {
+                buchung.diverse_adressnummer = val.to_string();
+            }
+            if let Some(val) = record.get(16) {
+                buchung.geschäftspartner_bank = val.to_string();
+            }
+            if let Some(val) = record.get(17) {
+                buchung.sachverhalt = val.to_string();
+            }
+            if let Some(val) = record.get(18) {
+                buchung.zinssperre = val.to_string();
+            }
+            if let Some(val) = record.get(19) {
+                buchung.beleg_link = val.to_string();
+            }
+            if let Some(val) = record.get(20) {
+                buchung.beleg_info_art1 = val.to_string();
+            }
+            if let Some(val) = record.get(21) {
+                buchung.beleg_info_inhalt1 = val.to_string();
+            }
+            if let Some(val) = record.get(22) {
+                buchung.beleg_info_art2 = val.to_string();
+            }
+            if let Some(val) = record.get(23) {
+                buchung.beleg_info_inhalt2 = val.to_string();
+            }
+            if let Some(val) = record.get(24) {
+                buchung.beleg_info_art3 = val.to_string();
+            }
+            if let Some(val) = record.get(25) {
+                buchung.beleg_info_inhalt3 = val.to_string();
+            }
+            if let Some(val) = record.get(26) {
+                buchung.beleg_info_art4 = val.to_string();
+            }
+            if let Some(val) = record.get(27) {
+                buchung.beleg_info_inhalt4 = val.to_string();
+            }
+            if let Some(val) = record.get(28) {
+                buchung.beleg_info_art5 = val.to_string();
+            }
+            if let Some(val) = record.get(29) {
+                buchung.beleg_info_inhalt5 = val.to_string();
+            }
+            if let Some(val) = record.get(30) {
+                buchung.beleg_info_art6 = val.to_string();
+            }
+            if let Some(val) = record.get(31) {
+                buchung.beleg_info_inhalt6 = val.to_string();
+            }
+            if let Some(val) = record.get(32) {
+                buchung.beleg_info_art7 = val.to_string();
+            }
+            if let Some(val) = record.get(33) {
+                buchung.beleg_info_inhalt7 = val.to_string();
+            }
+            if let Some(val) = record.get(34) {
+                buchung.beleg_info_art8 = val.to_string();
+            }
+            if let Some(val) = record.get(35) {
+                buchung.beleg_info_inhalt8 = val.to_string();
+            }
+            if let Some(val) = record.get(36) {
+                buchung.kost1_kostenstelle = Some(val.to_string());
+            }
+            if let Some(val) = record.get(37) {
+                buchung.kost2_kostenstelle = Some(val.to_string());
+            }
+            if let Some(val) = record.get(38) {
+                if !val.is_empty() {
+                    buchung.kost_menge = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(39) {
+                buchung.eu_ustid = Some(val.to_string());
+            }
+            if let Some(val) = record.get(40) {
+                if !val.is_empty() {
+                    buchung.eu_steuersatz = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(41) {
+                buchung.abweichende_versteuerungsart = val.to_string();
+            }
+            if let Some(val) = record.get(42) {
+                buchung.sachverhalt_l_l = val.to_string();
+            }
+            if let Some(val) = record.get(43) {
+                buchung.funktionsergänzung_l_l = val.to_string();
+            }
+            if let Some(val) = record.get(44) {
+                buchung.bu_49_hauptfunktiontyp = val.to_string();
+            }
+            if let Some(val) = record.get(45) {
+                buchung.bu_49_hauptfunktionsnummer = val.to_string();
+            }
+            if let Some(val) = record.get(46) {
+                buchung.bu_49_funktionsergänzung = val.to_string();
+            }
+            if let Some(val) = record.get(47) {
+                buchung.zusatzinformation_art1 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(48) {
+                buchung.zusatzinformation_inhalt1 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(49) {
+                buchung.zusatzinformation_art2 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(50) {
+                buchung.zusatzinformation_inhalt2 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(51) {
+                buchung.zusatzinformation_art3 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(52) {
+                buchung.zusatzinformation_inhalt3 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(53) {
+                buchung.zusatzinformation_art4 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(54) {
+                buchung.zusatzinformation_inhalt4 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(55) {
+                buchung.zusatzinformation_art5 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(56) {
+                buchung.zusatzinformation_inhalt5 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(57) {
+                buchung.zusatzinformation_art6 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(58) {
+                buchung.zusatzinformation_inhalt6 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(59) {
+                buchung.zusatzinformation_art7 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(60) {
+                buchung.zusatzinformation_inhalt7 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(61) {
+                buchung.zusatzinformation_art8 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(62) {
+                buchung.zusatzinformation_inhalt8 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(63) {
+                buchung.zusatzinformation_art9 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(64) {
+                buchung.zusatzinformation_inhalt9 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(65) {
+                buchung.zusatzinformation_art10 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(66) {
+                buchung.zusatzinformation_inhalt10 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(67) {
+                buchung.zusatzinformation_art11 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(68) {
+                buchung.zusatzinformation_inhalt11 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(69) {
+                buchung.zusatzinformation_art12 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(70) {
+                buchung.zusatzinformation_inhalt12 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(71) {
+                buchung.zusatzinformation_art13 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(72) {
+                buchung.zusatzinformation_inhalt13 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(73) {
+                buchung.zusatzinformation_art14 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(74) {
+                buchung.zusatzinformation_inhalt14 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(75) {
+                buchung.zusatzinformation_art15 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(76) {
+                buchung.zusatzinformation_inhalt15 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(77) {
+                buchung.zusatzinformation_art16 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(78) {
+                buchung.zusatzinformation_inhalt16 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(79) {
+                buchung.zusatzinformation_art17 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(80) {
+                buchung.zusatzinformation_inhalt17 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(81) {
+                buchung.zusatzinformation_art18 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(82) {
+                buchung.zusatzinformation_inhalt18 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(83) {
+                buchung.zusatzinformation_art19 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(84) {
+                buchung.zusatzinformation_inhalt19 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(85) {
+                buchung.zusatzinformation_art20 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(86) {
+                buchung.zusatzinformation_inhalt20 = Some(val.to_string());
+            }
+            if let Some(val) = record.get(87) {
+                if !val.is_empty() {
+                    buchung.stück = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(88) {
+                if !val.is_empty() {
+                    buchung.gewicht = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(89) {
+                buchung.zahlweise = Some(val.to_string());
+            }
+            if let Some(val) = record.get(90) {
+                buchung.forderungsart = Some(val.to_string());
+            }
+            if let Some(val) = record.get(91) {
+                if !val.is_empty() {
+                    buchung.forderungsjahr = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(92) {
+                buchung.zugeordnete_fälligkeit = Some(val.to_string());
+            }
+            if let Some(val) = record.get(93) {
+                buchung.skontotyp = Some(val.to_string());
+            }
+            if let Some(val) = record.get(94) {
+                buchung.auftragsnummer = Some(val.to_string());
+            }
+            if let Some(val) = record.get(95) {
+                buchung.buchungstyp = Some(val.to_string());
+            }
+            if let Some(val) = record.get(96) {
+                if !val.is_empty() {
+                    buchung.ust_schlüssel_anzahlung = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(97) {
+                buchung.eu_mitgliedstaat_anzahlung = Some(val.to_string());
+            }
+            if let Some(val) = record.get(98) {
+                buchung.sachverhalt_l_l_anzahlung = Some(val.to_string());
+            }
+            if let Some(val) = record.get(99) {
+                if !val.is_empty() {
+                    buchung.eu_steuersatz_anzahlung = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(100) {
+                if !val.is_empty() {
+                    buchung.erlöskonto_anzahlung = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(101) {
+                buchung.herkunft_kz = Some(val.to_string());
+            }
+            if let Some(val) = record.get(102) {
+                buchung.leerfeld = Some(val.to_string());
+            }
+            if let Some(val) = record.get(103) {
+                buchung.kost_datum = Some(val.to_string());
+            }
+            if let Some(val) = record.get(104) {
+                buchung.sepa_mandatsreferenz = Some(val.to_string());
+            }
+            if let Some(val) = record.get(105) {
+                if !val.is_empty() {
+                    buchung.skontosperre = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(106) {
+                buchung.gesellschaftername = Some(val.to_string());
+            }
+            if let Some(val) = record.get(107) {
+                buchung.beteiligtennummer = Some(val.to_string());
+            }
+            if let Some(val) = record.get(108) {
+                buchung.identifikationsnummer = Some(val.to_string());
+            }
+            if let Some(val) = record.get(109) {
+                buchung.zeichennummer = Some(val.to_string());
+            }
+            if let Some(val) = record.get(110) {
+                buchung.postensperre_bis = Some(val.to_string());
+            }
+            if let Some(val) = record.get(111) {
+                buchung.bezeichnung_so_bil_sachverhalt = Some(val.to_string());
+            }
+            if let Some(val) = record.get(112) {
+                buchung.kennzeichen_so_bil_buchung = Some(val.to_string());
+            }
+            if let Some(val) = record.get(113) {
+                buchung.festschreibung = match val {
+                    "0" => Some(Festschreibung::KeineFestschreibung),
+                    "1" => Some(Festschreibung::Festschreibung),
+                    _ => None,
+                };
+            }
+            if let Some(val) = record.get(114) {
+                buchung.leistungsdatum = Some(val.to_string());
+            }
+            if let Some(val) = record.get(115) {
+                buchung.datum_zuord_steuerperiode = Some(val.to_string());
+            }
+            if let Some(val) = record.get(116) {
+                buchung.fälligkeit = Some(val.to_string());
+            }
+            if let Some(val) = record.get(117) {
+                buchung.generalumkehr = Some(val.to_string());
+            }
+            if let Some(val) = record.get(118) {
+                if !val.is_empty() {
+                    buchung.steuersatz = Some(val.parse().unwrap());
+                }
+            }
+            if let Some(val) = record.get(119) {
+                buchung.land = Some(val.to_string());
+            }
+            if let Some(val) = record.get(120) {
+                buchung.abrechnungsreferenz = Some(val.to_string());
+            }
+            if let Some(val) = record.get(121) {
+                buchung.bvv_position = Some(val.to_string());
+            }
+            if let Some(val) = record.get(122) {
+                buchung.eu_ustid_ursprung = Some(val.to_string());
+            }
+            if let Some(val) = record.get(123) {
+                if !val.is_empty() {
+                    buchung.eu_steuersatz_ursprung = Some(val.parse().unwrap());
+                }
+            }
+            Ok(buchung)
+        }else{
+            Err("content not recognised")
+        }   
+    }
+}  

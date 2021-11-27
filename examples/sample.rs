@@ -1,15 +1,3 @@
-# datev-types-rs
-provides the DATEV format types including some serialization.
-
-## still work in progress
-
-This crate is still a work in progress and breaking changes will come at any time.
-
-## Sample
-
-render datev csv
-
-```rust
 use datev_types::header::Header;
 use datev_types::buchung::Buchung;
 use datev_types::Buchungsstapel;
@@ -42,4 +30,3 @@ fn main() {
     let str = format!("{}", stapel);
     println!("{}", str);
 }
-```

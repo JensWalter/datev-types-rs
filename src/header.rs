@@ -180,7 +180,6 @@ impl Display for Header {
               Some(Festschreibung::KeineFestschreibung) => "0",
               Some(Festschreibung::Festschreibung) => "1",
               None => "",
-              _ => "",
           },
           wkz = match &self.wkz {
               Some(val) => val.to_string(),
@@ -292,7 +291,7 @@ impl TryFrom<&str> for Header {
               };
           }
           if let Some(val) = record.get(21) {
-              if val.len() > 0 {
+              if !val.is_empty() {
                   header.wkz = Some(val.to_string());
               } else {
                   header.wkz = None;

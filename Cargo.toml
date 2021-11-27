@@ -1,6 +1,6 @@
 [package]
 name = "datev-types"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jens Walter <jens@apimeister.com>"]
 license = "MIT"
@@ -17,7 +17,7 @@ serde = { version = "1", features = ["derive"] }
 csv = "1.1"
 lazy_static = "1.4"
 regex = "1.5"
-encoding_rs = "0.8"
 
 [dev-dependencies]
 serde_json = "1"
+encoding_rs = "0.8"
