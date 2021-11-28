@@ -156,7 +156,7 @@ fn einzelbuchung() {
     let buchung = Buchung{
         soll_haben_kennzeichen: "S".to_string(),
         umsatz: 100.0,
-        beleg_datum: 2802,
+        beleg_datum: chrono::NaiveDate::from_ymd(2000, 2, 29),
         konto: 1800,
         gegenkonto: 1420,
         buchungstext: Some("zahlung 123".to_string()),

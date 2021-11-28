@@ -3,6 +3,7 @@ use validator::Validate;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use crate::header::Festschreibung;
+use chrono::NaiveDate;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -23,166 +24,276 @@ pub struct Buchung {
     /// Wenn Umsatz in Fremdwährung bei #1 angegeben wird
     /// #004, 005 und 006 sind zu übergeben
     /// z.B.: 1234,123456
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kurs: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub basis_umsatz: Option<f64>,
-    pub wkz_basis_umsatz: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub wkz_basis_umsatz: Option<String>,
     pub konto: u32,
     pub gegenkonto: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bu_schlüssel: Option<u32>,
-    /// Format: TTMM, z.B. 0105
+    /// nur Tag und Monat werden ausgewertet.
     /// Das Jahr wird immer aus
     /// dem Feld 13 des Headers ermittelt
-    pub beleg_datum: u16,
-    pub belegfeld1: String,
-    pub belegfeld2: String,
+    pub beleg_datum: NaiveDate,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub belegfeld1: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub belegfeld2: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub skonto: Option<f64>,
     #[validate(length(min = 0, max = 60))]
     pub buchungstext: Option<String>,
     #[validate(range(min = 0, max = 1))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub postensperre: Option<u8>,
-    pub diverse_adressnummer: String,
-    pub geschäftspartner_bank: String,
-    pub sachverhalt: String,
-    pub zinssperre: String,
-    pub beleg_link: String,
-    pub beleg_info_art1: String,
-    pub beleg_info_inhalt1: String,
-    pub beleg_info_art2: String,
-    pub beleg_info_inhalt2: String,
-    pub beleg_info_art3: String,
-    pub beleg_info_inhalt3: String,
-    pub beleg_info_art4: String,
-    pub beleg_info_inhalt4: String,
-    pub beleg_info_art5: String,
-    pub beleg_info_inhalt5: String,
-    pub beleg_info_art6: String,
-    pub beleg_info_inhalt6: String,
-    pub beleg_info_art7: String,
-    pub beleg_info_inhalt7: String,
-    pub beleg_info_art8: String,
-    pub beleg_info_inhalt8: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diverse_adressnummer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub geschäftspartner_bank: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sachverhalt: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zinssperre: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_link: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_art1: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_inhalt1: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_art2: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_inhalt2: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_art3: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_inhalt3: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_art4: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_inhalt4: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_art5: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_inhalt5: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_art6: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_inhalt6: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_art7: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_inhalt7: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_art8: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beleg_info_inhalt8: Option<String>,
     #[validate(length(min = 0, max = 36))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kost1_kostenstelle: Option<String>,
     #[validate(length(min = 0, max = 36))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kost2_kostenstelle: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kost_menge: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub eu_ustid: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub eu_steuersatz: Option<f64>,
-    pub abweichende_versteuerungsart: String,
-    pub sachverhalt_l_l: String,
-    pub funktionsergänzung_l_l: String,
-    pub bu_49_hauptfunktiontyp: String,
-    pub bu_49_hauptfunktionsnummer: String,
-    pub bu_49_funktionsergänzung: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub abweichende_versteuerungsart: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sachverhalt_l_l: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub funktionsergänzung_l_l: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bu_49_hauptfunktiontyp: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bu_49_hauptfunktionsnummer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bu_49_funktionsergänzung: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art1: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt1: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art2: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt2: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art3: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt3: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art4: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt4: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art5: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt5: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art6: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt6: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art7: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt7: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art8: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt8: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art9: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt9: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art10: Option<String>,    
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt10: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art11: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt11: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art12: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt12: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art13: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt13: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art14: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt14: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art15: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt15: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art16: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt16: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art17: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt17: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art18: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt18: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art19: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt19: Option<String>,
     #[validate(length(min = 0, max = 20))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_art20: Option<String>,
     #[validate(length(min = 0, max = 210))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zusatzinformation_inhalt20: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub stück: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub gewicht: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zahlweise: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub forderungsart: Option<String>,
     #[validate(range(min = 0, max = 2099))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub forderungsjahr: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub veranlagungsjahr: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zugeordnete_fälligkeit: Option<String>,
     // #[validate(range(min = 1, max = 2))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub skontotyp: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub auftragsnummer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub buchungstyp: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ust_schlüssel_anzahlung: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub eu_mitgliedstaat_anzahlung: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sachverhalt_l_l_anzahlung: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub eu_steuersatz_anzahlung: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub erlöskonto_anzahlung: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub herkunft_kz: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub leerfeld: Option<String>,
     /// Format TTMMJJJJ
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kost_datum: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sepa_mandatsreferenz: Option<String>,
+    /// Gültige Werte: 0, 1.
+    /// 1 = Skontosperre
+    /// 0 = Keine Skontosperre
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub skontosperre: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub gesellschaftername: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub beteiligtennummer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub identifikationsnummer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zeichennummer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub postensperre_bis: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bezeichnung_so_bil_sachverhalt: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kennzeichen_so_bil_buchung: Option<String>,
     /// leer=nichtdefiniert;wird  automatisch festgeschrieben
     /// 0 = keine Festschreibung
@@ -193,22 +304,35 @@ pub struct Buchung {
     pub festschreibung: Option<Festschreibung>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub leistungsdatum: Option<String>,
+    /// Format TTMMJJJJ
     #[serde(skip_serializing_if = "Option::is_none")]
     pub datum_zuord_steuerperiode: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fälligkeit: Option<String>,
+    /// G oder 1 = Generalumkehr
+    /// 0 = keine Generalumkehr
     #[serde(skip_serializing_if = "Option::is_none")]
     pub generalumkehr: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub steuersatz: Option<f64>,
+    /// Beispiel: DE für Deutschland
     #[serde(skip_serializing_if = "Option::is_none")]
     pub land: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub abrechnungsreferenz: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bvv_position: Option<String>,
+    /// Die USt-IdNr. besteht aus
+    /// - 2-stelligen Länderkürzel (siehe Dok.-Nr. 1080169)
+    /// Ausnahme Griechenland: Das Länderkürzel lautet EL)
+    /// - 13-stelliger USt-IdNr.
+    /// - Beispiel: DE133546770. Die USt-IdNr kann auch Buchstaben haben, z.B.: bei Österreich
+    /// Detaillierte Informationen zur Erfassung von EU-Informationen im Buchungssatz: Dok.-Nr: 9211462. 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub eu_ustid_ursprung: Option<String>,
+    /// Nur für entsprechende EU-Buchungen:
+    /// Der im EU-Ursprungsland gültige Steuersatz.
+    /// Beispiel: 12,12
     #[serde(skip_serializing_if = "Option::is_none")]
     pub eu_steuersatz_ursprung: Option<f64>,
 }
@@ -221,48 +345,48 @@ impl Default for Buchung {
             wkz_umsatz: "EUR".to_string(),
             kurs: None,
             basis_umsatz: None,
-            wkz_basis_umsatz: "".to_string(),
+            wkz_basis_umsatz: None,
             konto: 0,
             gegenkonto: 0,
             bu_schlüssel: None,
-            beleg_datum: 0,
-            belegfeld1: "".to_string(),
-            belegfeld2: "".to_string(),
+            beleg_datum: chrono::Local::today().naive_local(),
+            belegfeld1: None,
+            belegfeld2: None,
             skonto: None,
             buchungstext: None,
             postensperre: None,
-            diverse_adressnummer: "".to_string(),
-            geschäftspartner_bank: "".to_string(),
-            sachverhalt: "".to_string(),
-            zinssperre: "".to_string(),
-            beleg_link: "".to_string(),
-            beleg_info_art1: "".to_string(),
-            beleg_info_inhalt1: "".to_string(),
-            beleg_info_art2: "".to_string(),
-            beleg_info_inhalt2: "".to_string(),
-            beleg_info_art3: "".to_string(),
-            beleg_info_inhalt3: "".to_string(),
-            beleg_info_art4: "".to_string(),
-            beleg_info_inhalt4: "".to_string(),
-            beleg_info_art5: "".to_string(),
-            beleg_info_inhalt5: "".to_string(),
-            beleg_info_art6: "".to_string(),
-            beleg_info_inhalt6: "".to_string(),
-            beleg_info_art7: "".to_string(),
-            beleg_info_inhalt7: "".to_string(),
-            beleg_info_art8: "".to_string(),
-            beleg_info_inhalt8: "".to_string(),
+            diverse_adressnummer: None,
+            geschäftspartner_bank: None,
+            sachverhalt: None,
+            zinssperre: None,
+            beleg_link: None,
+            beleg_info_art1: None,
+            beleg_info_inhalt1: None,
+            beleg_info_art2: None,
+            beleg_info_inhalt2: None,
+            beleg_info_art3: None,
+            beleg_info_inhalt3: None,
+            beleg_info_art4: None,
+            beleg_info_inhalt4: None,
+            beleg_info_art5: None,
+            beleg_info_inhalt5: None,
+            beleg_info_art6: None,
+            beleg_info_inhalt6: None,
+            beleg_info_art7: None,
+            beleg_info_inhalt7: None,
+            beleg_info_art8: None,
+            beleg_info_inhalt8: None,
             kost1_kostenstelle: None,
             kost2_kostenstelle: None,
             kost_menge: None,
             eu_ustid: None,
             eu_steuersatz: None,
-            abweichende_versteuerungsart: "".to_string(),
-            sachverhalt_l_l: "".to_string(),
-            funktionsergänzung_l_l: "".to_string(),
-            bu_49_hauptfunktiontyp: "".to_string(),
-            bu_49_hauptfunktionsnummer: "".to_string(),
-            bu_49_funktionsergänzung: "".to_string(),
+            abweichende_versteuerungsart: None,
+            sachverhalt_l_l: None,
+            funktionsergänzung_l_l: None,
+            bu_49_hauptfunktiontyp: None,
+            bu_49_hauptfunktionsnummer: None,
+            bu_49_funktionsergänzung: None,
             zusatzinformation_art1: None,
             zusatzinformation_inhalt1: None,
             zusatzinformation_art2: None,
@@ -359,16 +483,25 @@ impl Display for Buchung{
             Some(val) => val.to_string(),
             None => "".to_string(),
         },
-        wkz_basis_umsatz = self.wkz_basis_umsatz,
+        wkz_basis_umsatz = match &self.wkz_basis_umsatz{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
         konto = self.konto,
         gegenkonto = self.gegenkonto,
         bu_schlüssel = match self.bu_schlüssel {
             Some(val) => val.to_string(),
             None => "".to_string(),
         },
-        beleg_datum = self.beleg_datum,
-        belegfeld1 = self.belegfeld1,
-        belegfeld2 = self.belegfeld2,
+        beleg_datum = self.beleg_datum.format("%d%m").to_string(),
+        belegfeld1 = match &self.belegfeld1 {
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        belegfeld2 = match &self.belegfeld2 {
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
         skonto = match self.skonto {
             Some(val) => val.to_string(),
             None => "".to_string(),
@@ -381,27 +514,90 @@ impl Display for Buchung{
             Some(val) => val.to_string(),
             None => "".to_string(),
         },
-        diverse_adressnummer = self.diverse_adressnummer,
-        geschäftspartner_bank = self.geschäftspartner_bank,
-        sachverhalt = self.sachverhalt,
-        zinssperre = self.zinssperre,
-        beleg_link = self.beleg_link,
-        beleg_info_art1 = self.beleg_info_art1,
-        beleg_info_inhalt1 = self.beleg_info_inhalt1,
-        beleg_info_art2 = self.beleg_info_art2,
-        beleg_info_inhalt2 = self.beleg_info_inhalt2,
-        beleg_info_art3 = self.beleg_info_art3,
-        beleg_info_inhalt3 = self.beleg_info_inhalt3,
-        beleg_info_art4 = self.beleg_info_art4,
-        beleg_info_inhalt4 = self.beleg_info_inhalt4,
-        beleg_info_art5 = self.beleg_info_art5,
-        beleg_info_inhalt5 = self.beleg_info_inhalt5,
-        beleg_info_art6 = self.beleg_info_art6,
-        beleg_info_inhalt6 = self.beleg_info_inhalt6,
-        beleg_info_art7 = self.beleg_info_art7,
-        beleg_info_inhalt7 = self.beleg_info_inhalt7,
-        beleg_info_art8 = self.beleg_info_art8,
-        beleg_info_inhalt8 = self.beleg_info_inhalt8,
+        diverse_adressnummer = match &self.diverse_adressnummer{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        geschäftspartner_bank = match &self.geschäftspartner_bank{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        sachverhalt = match &self.sachverhalt{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        zinssperre = match &self.zinssperre{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_link = match &self.beleg_link{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_art1 = match &self.beleg_info_art1{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_inhalt1 = match &self.beleg_info_inhalt1{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_art2 = match &self.beleg_info_art2{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_inhalt2 = match &self.beleg_info_inhalt2{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_art3 = match &self.beleg_info_art3{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_inhalt3 = match &self.beleg_info_inhalt3{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_art4 = match &self.beleg_info_art4{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_inhalt4 = match &self.beleg_info_inhalt4{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_art5 = match &self.beleg_info_art5{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_inhalt5 = match &self.beleg_info_inhalt5{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_art6 = match &self.beleg_info_art6{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_inhalt6 = match &self.beleg_info_inhalt6{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_art7 = match &self.beleg_info_art7{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_inhalt7 = match &self.beleg_info_inhalt7{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_art8 = match &self.beleg_info_art8{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        beleg_info_inhalt8 = match &self.beleg_info_inhalt8{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
         kost1_kostenstelle = match &self.kost1_kostenstelle {
             Some(val) => val.to_string(),
             None => "".to_string(),
@@ -422,12 +618,30 @@ impl Display for Buchung{
             Some(val) => val.to_string(),
             None => "".to_string(),
         },
-        abweichende_versteuerungsart = self.abweichende_versteuerungsart,
-        sachverhalt_l_l = self.sachverhalt_l_l,
-        funktionsergänzung_l_l = self.funktionsergänzung_l_l,
-        bu_49_hauptfunktiontyp = self.bu_49_hauptfunktiontyp,
-        bu_49_hauptfunktionsnummer = self.bu_49_hauptfunktionsnummer,
-        bu_49_funktionsergänzung = self.bu_49_funktionsergänzung,
+        abweichende_versteuerungsart = match &self.abweichende_versteuerungsart{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        sachverhalt_l_l = match &self.sachverhalt_l_l{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        funktionsergänzung_l_l = match &self.funktionsergänzung_l_l{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        bu_49_hauptfunktiontyp = match &self.bu_49_hauptfunktiontyp{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        bu_49_hauptfunktionsnummer = match &self.bu_49_hauptfunktionsnummer{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
+        bu_49_funktionsergänzung = match &self.bu_49_funktionsergänzung{
+            Some(val) => val.to_string(),
+            None => "".to_string(),
+        },
         zusatzinformation_art1 = match &self.zusatzinformation_art1 {
             Some(val) => val.to_string(),
             None => "".to_string(),
@@ -779,7 +993,7 @@ impl TryFrom<&str> for Buchung {
                 }
             }
             if let Some(val) = record.get(5) {
-                buchung.wkz_basis_umsatz = val.to_string();
+                buchung.wkz_basis_umsatz = Some(val.to_string());
             }
             if let Some(val) = record.get(6) {
                 buchung.konto = val.parse().unwrap();
@@ -793,13 +1007,15 @@ impl TryFrom<&str> for Buchung {
                 }
             }
             if let Some(val) = record.get(9) {
-                buchung.beleg_datum = val.parse().unwrap();
+                //TODO find correct year
+                let x = format!("{}-2021", val);
+                buchung.beleg_datum = chrono::NaiveDate::parse_from_str(&x, "%d%m-%Y").unwrap();
             }
             if let Some(val) = record.get(10) {
-                buchung.belegfeld1 = val.to_string();
+                buchung.belegfeld1 = Some(val.to_string());
             }
             if let Some(val) = record.get(11) {
-                buchung.belegfeld2 = val.to_string();
+                buchung.belegfeld2 = Some(val.to_string());
             }
             if let Some(val) = record.get(12) {
                 if !val.is_empty() {
@@ -816,67 +1032,67 @@ impl TryFrom<&str> for Buchung {
                 }
             }
             if let Some(val) = record.get(15) {
-                buchung.diverse_adressnummer = val.to_string();
+                buchung.diverse_adressnummer = Some(val.to_string());
             }
             if let Some(val) = record.get(16) {
-                buchung.geschäftspartner_bank = val.to_string();
+                buchung.geschäftspartner_bank = Some(val.to_string());
             }
             if let Some(val) = record.get(17) {
-                buchung.sachverhalt = val.to_string();
+                buchung.sachverhalt = Some(val.to_string());
             }
             if let Some(val) = record.get(18) {
-                buchung.zinssperre = val.to_string();
+                buchung.zinssperre = Some(val.to_string());
             }
             if let Some(val) = record.get(19) {
-                buchung.beleg_link = val.to_string();
+                buchung.beleg_link = Some(val.to_string());
             }
             if let Some(val) = record.get(20) {
-                buchung.beleg_info_art1 = val.to_string();
+                buchung.beleg_info_art1 = Some(val.to_string());
             }
             if let Some(val) = record.get(21) {
-                buchung.beleg_info_inhalt1 = val.to_string();
+                buchung.beleg_info_inhalt1 = Some(val.to_string());
             }
             if let Some(val) = record.get(22) {
-                buchung.beleg_info_art2 = val.to_string();
+                buchung.beleg_info_art2 = Some(val.to_string());
             }
             if let Some(val) = record.get(23) {
-                buchung.beleg_info_inhalt2 = val.to_string();
+                buchung.beleg_info_inhalt2 = Some(val.to_string());
             }
             if let Some(val) = record.get(24) {
-                buchung.beleg_info_art3 = val.to_string();
+                buchung.beleg_info_art3 = Some(val.to_string());
             }
             if let Some(val) = record.get(25) {
-                buchung.beleg_info_inhalt3 = val.to_string();
+                buchung.beleg_info_inhalt3 = Some(val.to_string());
             }
             if let Some(val) = record.get(26) {
-                buchung.beleg_info_art4 = val.to_string();
+                buchung.beleg_info_art4 = Some(val.to_string());
             }
             if let Some(val) = record.get(27) {
-                buchung.beleg_info_inhalt4 = val.to_string();
+                buchung.beleg_info_inhalt4 = Some(val.to_string());
             }
             if let Some(val) = record.get(28) {
-                buchung.beleg_info_art5 = val.to_string();
+                buchung.beleg_info_art5 = Some(val.to_string());
             }
             if let Some(val) = record.get(29) {
-                buchung.beleg_info_inhalt5 = val.to_string();
+                buchung.beleg_info_inhalt5 = Some(val.to_string());
             }
             if let Some(val) = record.get(30) {
-                buchung.beleg_info_art6 = val.to_string();
+                buchung.beleg_info_art6 = Some(val.to_string());
             }
             if let Some(val) = record.get(31) {
-                buchung.beleg_info_inhalt6 = val.to_string();
+                buchung.beleg_info_inhalt6 = Some(val.to_string());
             }
             if let Some(val) = record.get(32) {
-                buchung.beleg_info_art7 = val.to_string();
+                buchung.beleg_info_art7 = Some(val.to_string());
             }
             if let Some(val) = record.get(33) {
-                buchung.beleg_info_inhalt7 = val.to_string();
+                buchung.beleg_info_inhalt7 = Some(val.to_string());
             }
             if let Some(val) = record.get(34) {
-                buchung.beleg_info_art8 = val.to_string();
+                buchung.beleg_info_art8 = Some(val.to_string());
             }
             if let Some(val) = record.get(35) {
-                buchung.beleg_info_inhalt8 = val.to_string();
+                buchung.beleg_info_inhalt8 = Some(val.to_string());
             }
             if let Some(val) = record.get(36) {
                 buchung.kost1_kostenstelle = Some(val.to_string());
@@ -898,22 +1114,22 @@ impl TryFrom<&str> for Buchung {
                 }
             }
             if let Some(val) = record.get(41) {
-                buchung.abweichende_versteuerungsart = val.to_string();
+                buchung.abweichende_versteuerungsart = Some(val.to_string());
             }
             if let Some(val) = record.get(42) {
-                buchung.sachverhalt_l_l = val.to_string();
+                buchung.sachverhalt_l_l = Some(val.to_string());
             }
             if let Some(val) = record.get(43) {
-                buchung.funktionsergänzung_l_l = val.to_string();
+                buchung.funktionsergänzung_l_l = Some(val.to_string());
             }
             if let Some(val) = record.get(44) {
-                buchung.bu_49_hauptfunktiontyp = val.to_string();
+                buchung.bu_49_hauptfunktiontyp = Some(val.to_string());
             }
             if let Some(val) = record.get(45) {
-                buchung.bu_49_hauptfunktionsnummer = val.to_string();
+                buchung.bu_49_hauptfunktionsnummer = Some(val.to_string());
             }
             if let Some(val) = record.get(46) {
-                buchung.bu_49_funktionsergänzung = val.to_string();
+                buchung.bu_49_funktionsergänzung = Some(val.to_string());
             }
             if let Some(val) = record.get(47) {
                 buchung.zusatzinformation_art1 = Some(val.to_string());
