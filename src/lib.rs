@@ -94,13 +94,13 @@ fn valid_header() {
     assert_eq!(header.format_kategorie, 21);
     assert_eq!(header.format_name, "Buchungsstapel");
     assert_eq!(header.format_version, 7);
-    assert_eq!(header.erzeugt_am, 20211106165314647);
+    assert_eq!(header.erzeugt_am, chrono::NaiveDateTime::parse_from_str("20211106165314647","%Y%m%d%H%M%S%3f").unwrap());
     assert_eq!(header.beraternummer, 1000);
     assert_eq!(header.mandantennummer, 1);
-    assert_eq!(header.wj_beginn, 20190101);
+    assert_eq!(header.wj_beginn, chrono::NaiveDate::from_ymd(2019,1,1));
     assert_eq!(header.sachkontenlänge, 4);
-    assert_eq!(header.datum_von, 20190101);
-    assert_eq!(header.datum_bis, 20191231);
+    assert_eq!(header.datum_von, chrono::NaiveDate::from_ymd(2019,1,1));
+    assert_eq!(header.datum_bis, chrono::NaiveDate::from_ymd(2019,12,31));
     assert_eq!(header.buchungstyp, None);
     assert_eq!(header.rechnungslegungszweck, None);
     assert_eq!(header.festschreibung, None);
@@ -110,18 +110,20 @@ fn valid_header() {
 fn full_cycle_header() {
     let header = Header{
         format_name: "Buchungsstapel".to_string(),
-        erzeugt_am: 20211106165314647,
+        erzeugt_am: chrono::Local::now().naive_local(),
         beraternummer: 1000,
         mandantennummer: 1,
-        wj_beginn: 20190101,
+        wj_beginn: chrono::NaiveDate::from_ymd(2019,1,1),
         sachkontenlänge: 4,
-        datum_von: 20190101,
-        datum_bis: 20191231,
+        datum_von: chrono::NaiveDate::from_ymd(2019,1,1),
+        datum_bis: chrono::NaiveDate::from_ymd(2019,12,31),
         ..Default::default()
     };
     let data = format!("{}",header);
     println!("{}",data);
-    let header2 = Header::try_from(data.as_str()).unwrap();
+    let mut header2 = Header::try_from(data.as_str()).unwrap();
+    //need to overwrite ezeugt_am because of the higher precision
+    header2.erzeugt_am = header.erzeugt_am.clone();
     println!("{}",header2);
     assert_eq!(header, header2);
     assert_eq!(format!("{}",header),format!("{}",header2));
@@ -138,23 +140,24 @@ fn invalid_header() {
 
 #[test]
 fn einzelbuchung() {
+    use buchung::SollHabenKennzeichen;
     let header = Header{
         kennzeichen: "EXTF".to_string(),
         versionsnummer: 700,
         format_kategorie: 21,
         format_name: "Buchungsstapel".to_string(),
         format_version: 7,
-        erzeugt_am: 20211106165314647,
+        erzeugt_am: chrono::Local::now().naive_local(),
         beraternummer: 1000,
         mandantennummer: 1,
-        wj_beginn: 20190101,
+        wj_beginn: chrono::NaiveDate::from_ymd(2019,1,1),
         sachkontenlänge: 4,
-        datum_von: 20190101,
-        datum_bis: 20191231,
+        datum_von: chrono::NaiveDate::from_ymd(2019,1,1),
+        datum_bis: chrono::NaiveDate::from_ymd(2019,12,31),
         ..Default::default()
     };
     let buchung = Buchung{
-        soll_haben_kennzeichen: "S".to_string(),
+        soll_haben_kennzeichen: SollHabenKennzeichen::Soll,
         umsatz: 100.0,
         beleg_datum: chrono::NaiveDate::from_ymd(2000, 2, 29),
         konto: 1800,

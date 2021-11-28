@@ -4,6 +4,7 @@ use regex::Regex;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use chrono::NaiveDate;
+use chrono::NaiveDateTime;
 
 lazy_static! {
   static ref KENNZEICHEN: Regex = Regex::new(r#"^(EXTF|DTVF)$"#).unwrap();
@@ -34,7 +35,7 @@ pub struct Header {
   pub format_version: u16,
   /// Zeitstempel:
   /// YYYYMMDDHHMMSSFFF
-  pub erzeugt_am: u64,
+  pub erzeugt_am: NaiveDateTime,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub leerfeld1: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -130,7 +131,7 @@ impl Default for Header {
           format_kategorie: 21,
           format_name: String::from("Buchungsstapel"),
           format_version: 12,
-          erzeugt_am: 0,
+          erzeugt_am: chrono::Local::now().naive_local(),
           leerfeld1: None,
           leerfeld2: None,
           leerfeld3: None,
@@ -168,7 +169,7 @@ impl Display for Header {
           format_kategorie=self.format_kategorie,
           format_name=self.format_name,
           format_version=self.format_version,
-          erzeugt_am=self.erzeugt_am,
+          erzeugt_am=self.erzeugt_am.format("%Y%m%d%H%M%S%3f"),
           leerfeld1=match &self.leerfeld1{
             Some(x) => format!("{}", x),
             None => String::from(""),
@@ -187,10 +188,10 @@ impl Display for Header {
           },
           beraternummer=self.beraternummer,
           mandantennummer=self.mandantennummer,
-          wj_beginn=self.wj_beginn,
+          wj_beginn=self.wj_beginn.format("%Y%m%d").to_string(),
           sachkontenlänge=self.sachkontenlänge,
-          datum_von=self.datum_von,
-          datum_bis=self.datum_bis,
+          datum_von=self.datum_von.format("%Y%m%d").to_string(),
+          datum_bis=self.datum_bis.format("%Y%m%d").to_string(),
           bezeichnung=match &self.bezeichnung{
             Some(x) => format!("{}", x),
             None => String::from(""),
@@ -292,7 +293,7 @@ impl TryFrom<&str> for Header {
               header.format_version = val.parse::<u16>().unwrap();
           }
           if let Some(val) = record.get(5) {
-              header.erzeugt_am = val.parse::<u64>().unwrap();
+              header.erzeugt_am = NaiveDateTime::parse_from_str(val, "%Y%m%d%H%M%S%3f").unwrap();
           }
           if let Some(val) = record.get(6) {
               if val.len() > 0 {

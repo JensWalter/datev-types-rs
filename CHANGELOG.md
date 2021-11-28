@@ -1,7 +1,8 @@
-# 0.3.0 - 2021-11-28
+# 0.3.0 - 2021-11-27
 
 * better json support
-* types dates
+* use chrono for dates
+* fix newline for `Buchung`
 
 # 0.2.0 - 2021-11-26
 

@@ -17,7 +17,7 @@ pub struct Buchung {
     /// Konto
     /// S = SOLL (default)
     /// H = HABEN
-    pub soll_haben_kennzeichen: String,
+    pub soll_haben_kennzeichen: SollHabenKennzeichen,
     /// ISO-Code der Währung
     /// #22 aus Header = default
     pub wkz_umsatz: String,
@@ -341,7 +341,7 @@ impl Default for Buchung {
     fn default() -> Self {
         Buchung {
             umsatz: 0.0,
-            soll_haben_kennzeichen: "H".to_string(),
+            soll_haben_kennzeichen: SollHabenKennzeichen::default(),
             wkz_umsatz: "EUR".to_string(),
             kurs: None,
             basis_umsatz: None,
@@ -471,7 +471,7 @@ impl Default for Buchung {
 
 impl Display for Buchung{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, r#"{umsatz};{soll_haben_kennzeichen};{wkz_umsatz};{kurs};{basis_umsatz};{wkz_basis_umsatz};{konto};{gegenkonto};{bu_schlüssel};{beleg_datum};{belegfeld1};{belegfeld2};{skonto};{buchungstext};{posten_sperre};{diverse_adressnummer};{geschäftspartner_bank};{sachverhalt};{zinssperre};{beleg_link};{beleg_info_art1};{beleg_info_inhalt1};{beleg_info_art2};{beleg_info_inhalt2};{beleg_info_art3};{beleg_info_inhalt3};{beleg_info_art4};{beleg_info_inhalt4};{beleg_info_art5};{beleg_info_inhalt5};{beleg_info_art6};{beleg_info_inhalt6};{beleg_info_art7};{beleg_info_inhalt7};{beleg_info_art8};{beleg_info_inhalt8};{kost1_kostenstelle};{kost2_kostenstelle};{kost_menge};{eu_ustid};{eu_steuersatz};{abweichende_versteuerungsart};{sachverhalt_l_l};{funktionsergänzung_l_l};{bu_49_hauptfunktiontyp};{bu_49_hauptfunktionsnummer};{bu_49_funktionsergänzung};{zusatzinformation_art1};{zusatzinformation_inhalt1};{zusatzinformation_art2};{zusatzinformation_inhalt2};{zusatzinformation_art3};{zusatzinformation_inhalt3};{zusatzinformation_art4};{zusatzinformation_inhalt4};{zusatzinformation_art5};{zusatzinformation_inhalt5};{zusatzinformation_art6};{zusatzinformation_inhalt6};{zusatzinformation_art7};{zusatzinformation_inhalt7};{zusatzinformation_art8};{zusatzinformation_inhalt8};{zusatzinformation_art9};{zusatzinformation_inhalt9};{zusatzinformation_art10};{zusatzinformation_inhalt10};{zusatzinformation_art11};{zusatzinformation_inhalt11};{zusatzinformation_art12};{zusatzinformation_inhalt12};{zusatzinformation_art13};{zusatzinformation_inhalt13};{zusatzinformation_art14};{zusatzinformation_inhalt14};{zusatzinformation_art15};{zusatzinformation_inhalt15};{zusatzinformation_art16};{zusatzinformation_inhalt16};{zusatzinformation_art17};{zusatzinformation_inhalt17};{zusatzinformation_art18};{zusatzinformation_inhalt18};{zusatzinformation_art19};{zusatzinformation_inhalt19};{zusatzinformation_art20};{zusatzinformation_inhalt20};{stück};{gewicht};{zahlweise};{forderungsart};{forderungsjahr};{veranlagungsjahr};{zugeordnete_fälligkeit};{skontotyp};{auftragsnummer};{buchungstyp};{ust_schlüssel_anzahlung};{eu_mitgliedstaat_anzahlung};{sachverhalt_l_l_anzahlung};{eu_steuersatz_anzahlung};{erlöskonto_anzahlung};{herkunft_kz};{leerfeld};{kost_datum};{sepa_mandatsreferenz};{skontosperre};{gesellschaftername};{beteiligtennummer};{identifikationsnummer};{zeichennummer};{postensperre_bis};{bezeichnung_so_bil_sachverhalt};{kennzeichen_so_bil_buchung};{festschreibung};{leistungsdatum};{datum_zuord_steuerperiode};{fälligkeit};{generalumkehr};{steuersatz};{land};{abrechnungsreferenz};{bvv_position};{eu_ustid_ursprung};{eu_steuersatz_ursprung}\n"#,
+        write!(f, r#"{umsatz};{soll_haben_kennzeichen};{wkz_umsatz};{kurs};{basis_umsatz};{wkz_basis_umsatz};{konto};{gegenkonto};{bu_schlüssel};{beleg_datum};{belegfeld1};{belegfeld2};{skonto};{buchungstext};{posten_sperre};{diverse_adressnummer};{geschäftspartner_bank};{sachverhalt};{zinssperre};{beleg_link};{beleg_info_art1};{beleg_info_inhalt1};{beleg_info_art2};{beleg_info_inhalt2};{beleg_info_art3};{beleg_info_inhalt3};{beleg_info_art4};{beleg_info_inhalt4};{beleg_info_art5};{beleg_info_inhalt5};{beleg_info_art6};{beleg_info_inhalt6};{beleg_info_art7};{beleg_info_inhalt7};{beleg_info_art8};{beleg_info_inhalt8};{kost1_kostenstelle};{kost2_kostenstelle};{kost_menge};{eu_ustid};{eu_steuersatz};{abweichende_versteuerungsart};{sachverhalt_l_l};{funktionsergänzung_l_l};{bu_49_hauptfunktiontyp};{bu_49_hauptfunktionsnummer};{bu_49_funktionsergänzung};{zusatzinformation_art1};{zusatzinformation_inhalt1};{zusatzinformation_art2};{zusatzinformation_inhalt2};{zusatzinformation_art3};{zusatzinformation_inhalt3};{zusatzinformation_art4};{zusatzinformation_inhalt4};{zusatzinformation_art5};{zusatzinformation_inhalt5};{zusatzinformation_art6};{zusatzinformation_inhalt6};{zusatzinformation_art7};{zusatzinformation_inhalt7};{zusatzinformation_art8};{zusatzinformation_inhalt8};{zusatzinformation_art9};{zusatzinformation_inhalt9};{zusatzinformation_art10};{zusatzinformation_inhalt10};{zusatzinformation_art11};{zusatzinformation_inhalt11};{zusatzinformation_art12};{zusatzinformation_inhalt12};{zusatzinformation_art13};{zusatzinformation_inhalt13};{zusatzinformation_art14};{zusatzinformation_inhalt14};{zusatzinformation_art15};{zusatzinformation_inhalt15};{zusatzinformation_art16};{zusatzinformation_inhalt16};{zusatzinformation_art17};{zusatzinformation_inhalt17};{zusatzinformation_art18};{zusatzinformation_inhalt18};{zusatzinformation_art19};{zusatzinformation_inhalt19};{zusatzinformation_art20};{zusatzinformation_inhalt20};{stück};{gewicht};{zahlweise};{forderungsart};{forderungsjahr};{veranlagungsjahr};{zugeordnete_fälligkeit};{skontotyp};{auftragsnummer};{buchungstyp};{ust_schlüssel_anzahlung};{eu_mitgliedstaat_anzahlung};{sachverhalt_l_l_anzahlung};{eu_steuersatz_anzahlung};{erlöskonto_anzahlung};{herkunft_kz};{leerfeld};{kost_datum};{sepa_mandatsreferenz};{skontosperre};{gesellschaftername};{beteiligtennummer};{identifikationsnummer};{zeichennummer};{postensperre_bis};{bezeichnung_so_bil_sachverhalt};{kennzeichen_so_bil_buchung};{festschreibung};{leistungsdatum};{datum_zuord_steuerperiode};{fälligkeit};{generalumkehr};{steuersatz};{land};{abrechnungsreferenz};{bvv_position};{eu_ustid_ursprung};{eu_steuersatz_ursprung}{newline}"#,
         umsatz = self.umsatz,
         soll_haben_kennzeichen = self.soll_haben_kennzeichen,
         wkz_umsatz = self.wkz_umsatz,
@@ -954,6 +954,7 @@ impl Display for Buchung{
             Some(val) => val.to_string(),
             None => "".to_string(),
         },
+        newline = "\n",
         )      
     }
 }
@@ -975,7 +976,11 @@ impl TryFrom<&str> for Buchung {
                 buchung.umsatz = fixed_decimal.parse().unwrap();
             }
             if let Some(val) = record.get(1) {
-                buchung.soll_haben_kennzeichen = val.to_string();
+                buchung.soll_haben_kennzeichen = match val{
+                    "H" => SollHabenKennzeichen::Haben,
+                    "S" => SollHabenKennzeichen::Soll,
+                    _ => SollHabenKennzeichen::default(),
+                };
             }
             if let Some(val) = record.get(2) {
                 buchung.wkz_umsatz = val.to_string();
@@ -1389,4 +1394,24 @@ impl TryFrom<&str> for Buchung {
             Err("content not recognised")
         }   
     }
-}  
+}
+
+#[derive(Clone, PartialEq, Debug, Eq, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum SollHabenKennzeichen{
+  Soll,
+  Haben,
+}
+impl Default for SollHabenKennzeichen {
+  fn default() -> Self {
+      SollHabenKennzeichen::Soll
+  }
+}
+impl Display for SollHabenKennzeichen {
+  fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+      write!(f, "{}", match self {
+          SollHabenKennzeichen::Soll => "S",
+          SollHabenKennzeichen::Haben => "H",
+      })
+  }
+}

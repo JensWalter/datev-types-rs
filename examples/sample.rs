@@ -1,12 +1,13 @@
 use datev_types::header::Header;
 use datev_types::buchung::Buchung;
+use datev_types::buchung::SollHabenKennzeichen;
 use datev_types::Buchungsstapel;
 use chrono::NaiveDate;
 
 fn main() {
     let header = Header{
         format_name: "Buchungsstapel".to_string(),
-        erzeugt_am: 20211106165314647,
+        erzeugt_am: chrono::Local::now().naive_local(),
         beraternummer: 1000,
         mandantennummer: 1,
         wj_beginn: NaiveDate::from_ymd(2019,01,01),
@@ -16,7 +17,7 @@ fn main() {
         ..Default::default()
     };
     let buchung = Buchung{
-        soll_haben_kennzeichen: "S".to_string(),
+        soll_haben_kennzeichen: SollHabenKennzeichen::Soll,
         umsatz: 100.0,
         beleg_datum: NaiveDate::from_ymd(2021, 2, 28),
         konto: 1800,
