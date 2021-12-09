@@ -4,11 +4,13 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use header::Header;
 use buchung::Buchung;
+use debkred::DebKred;
 #[macro_use]
 extern crate lazy_static;
 
 pub mod header;
 pub mod buchung;
+pub mod debkred;
 
 #[derive(Clone, Debug, PartialEq, Validate, Serialize, Deserialize)]
 pub struct Buchungsstapel {
@@ -69,27 +71,74 @@ impl TryFrom<&str> for Buchungsstapel {
 }
 
 #[allow(non_camel_case_types)]
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DebKred_Stamm{
     header: Header,
     debitoren_kreditoren: Vec<DebKred>,
 }
 
-#[allow(non_camel_case_types)]
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct DebKred {
-    konto: u32,
+impl Default for DebKred_Stamm{
+    fn default() -> Self {
+        DebKred_Stamm {
+            header: Header::default(),
+            debitoren_kreditoren: Vec::new(),
+        }
+    }
+}
+
+impl Display for DebKred_Stamm {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{}",self.header))?;
+        for debkred in &self.debitoren_kreditoren {
+            debkred.fmt(f)?;
+        }
+        Ok(())
+    }
+}
+
+impl TryFrom<&str> for DebKred_Stamm {
+    type Error = &'static str;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let split;
+        if value.contains("\r\n") {
+            split = value.split("\r\n");
+        }else{
+            split = value.split("\n");
+        }
+        let vec: Vec<&str> = split.collect();
+        
+        let header_str: &str = vec.get(0).unwrap();
+        let header = Header::try_from(header_str).unwrap();
+
+        let mut debitoren_kreditoren: Vec<DebKred> = Vec::new();
+        for input in vec.iter().skip(2) {
+            let input2: String = input.to_string();
+            let input3: &str = &input2.replace(',',".");
+            if !input3.is_empty() {
+                let debkred = DebKred::try_from(input3).unwrap();
+                debitoren_kreditoren.push(debkred);
+            }
+        }
+
+        let stapel = DebKred_Stamm{
+            header,
+            debitoren_kreditoren,
+        };
+        Ok(stapel)
+    }
 }
 
 #[test]
 fn valid_header() {
+    use header::Kennzeichen;
     let str = r#""EXTF";510;21;"Buchungsstapel";7;20211106165314647;;"";"";"";1000;1;20190101;4;20190101;20191231;"";"";;;;"";;"";;;"";;;"";"""#;
     
     let result = Header::try_from(str);
     assert!(result.is_ok());
     let header = result.unwrap();
     header.validate().unwrap();
-    assert_eq!(header.kennzeichen, "EXTF");
+    assert_eq!(header.kennzeichen, Kennzeichen::EXTF);
     assert_eq!(header.versionsnummer, 510);
     assert_eq!(header.format_kategorie, 21);
     assert_eq!(header.format_name, "Buchungsstapel");
@@ -141,8 +190,10 @@ fn invalid_header() {
 #[test]
 fn einzelbuchung() {
     use buchung::SollHabenKennzeichen;
+    use header::Kennzeichen;
+
     let header = Header{
-        kennzeichen: "EXTF".to_string(),
+        kennzeichen: Kennzeichen::EXTF,
         versionsnummer: 700,
         format_kategorie: 21,
         format_name: "Buchungsstapel".to_string(),
@@ -214,4 +265,25 @@ fn test_sage_export_buchung(){
     let _b1 = Buchung::try_from(input).unwrap();
     let _b2 = Buchung::try_from(input2).unwrap();
     let _b3 = Buchung::try_from(input3).unwrap();
+}
+
+#[test]
+fn test_extf_debkred() {
+    use std::io::Read;
+    let mut f = std::fs::File::open("./test-data/EXTF_DebKred_Stamm.csv").unwrap();
+    let mut buffer = Vec::new();
+    f.read_to_end(&mut buffer).unwrap();
+    //length in windows encoding
+    assert_eq!(buffer.len(), 10294);
+    let (cow, encoding_used, had_errors) = encoding_rs::WINDOWS_1252.decode(&buffer);
+    assert_eq!(had_errors, false);
+    assert_eq!(encoding_used, encoding_rs::WINDOWS_1252);
+    //length in utf-8 encoding
+    assert_eq!(cow.len(), 10371);
+    let str: String = cow.to_string();
+    println!("{}", str);
+    println!("done.");
+    let stammdaten: DebKred_Stamm = DebKred_Stamm::try_from(str.as_str()).unwrap();
+    let first = stammdaten.debitoren_kreditoren.get(0).unwrap();
+    assert_eq!(first.konto, 10000);
 }

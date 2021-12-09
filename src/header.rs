@@ -7,15 +7,13 @@ use chrono::NaiveDate;
 use chrono::NaiveDateTime;
 
 lazy_static! {
-  static ref KENNZEICHEN: Regex = Regex::new(r#"^(EXTF|DTVF)$"#).unwrap();
   static ref FORMATNAME: Regex = Regex::new(r#"^(Buchungsstapel|Wiederkehrende Buchungen|Debitoren/Kreditoren|Sachkontenbeschriftungen|Zahlungsbedingungen|Diverse Adressen)$"#).unwrap();
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Validate, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Header {
-  #[validate(regex = "KENNZEICHEN")]
-  pub kennzeichen: String,
+  pub kennzeichen: Kennzeichen,
   pub versionsnummer: u32,
   /// 16 = Debitoren-/Kreditoren
   /// 20 = Sachkontenbeschriftungen
@@ -126,7 +124,7 @@ pub enum BuchungsTyp {
 impl Default for Header {
   fn default() -> Self {
       Header{
-          kennzeichen: String::from("EXTF"),
+          kennzeichen: Kennzeichen::EXTF,
           versionsnummer: 700,
           format_kategorie: 21,
           format_name: String::from("Buchungsstapel"),
@@ -278,7 +276,13 @@ impl TryFrom<&str> for Header {
           let mut header = Header::default();
           //add values
           if let Some(val) = record.get(0) {
-              header.kennzeichen = val.to_string();
+            if val.len() > 0 {
+              header.kennzeichen = match val {
+                "EXTF" => Kennzeichen::EXTF,
+                "DTVF" => Kennzeichen::DTVF,
+                _ => return Err("Kennzeichen ist weder EXTF noch DTVF"),
+              };
+            }
           }
           if let Some(val) = record.get(1) {
               header.versionsnummer = val.parse::<u32>().unwrap();
@@ -328,10 +332,14 @@ impl TryFrom<&str> for Header {
               header.sachkontenlänge = val.parse::<u32>().unwrap();
           }
           if let Some(val) = record.get(14) {
+            if val.len() > 0 {
               header.datum_von = NaiveDate::parse_from_str(val, "%Y%m%d").unwrap();
+            }
           }
           if let Some(val) = record.get(15) {
+            if val.len() > 0 {
               header.datum_bis = NaiveDate::parse_from_str(val, "%Y%m%d").unwrap();
+            }
           }
           if let Some(val) = record.get(16) {
             if val.len() > 0 {
@@ -427,10 +435,9 @@ impl TryFrom<&str> for Header {
 }
 
 #[derive(Clone, PartialEq, Debug, Eq, Serialize, Deserialize)]
-#[repr(u8)]
 pub enum Festschreibung{
-  KeineFestschreibung = 0,
-  Festschreibung = 1,
+  KeineFestschreibung,
+  Festschreibung,
 }
 impl Default for Festschreibung {
   fn default() -> Self {
@@ -442,6 +449,29 @@ impl Display for Festschreibung {
       write!(f, "{}", match self {
           Festschreibung::KeineFestschreibung => "0",
           Festschreibung::Festschreibung => "1",
+      })
+  }
+}
+
+#[derive(Clone, PartialEq, Debug, Eq, Serialize, Deserialize)]
+pub enum Kennzeichen{
+  /// externe Daten
+  EXTF,
+  /// datev Daten
+  DTVF,
+}
+
+impl Default for Kennzeichen {
+  fn default() -> Self {
+      Kennzeichen::EXTF
+  }
+}
+
+impl Display for Kennzeichen {
+  fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+      write!(f, "{}", match self {
+          Kennzeichen::EXTF => "EXTF",
+          Kennzeichen::DTVF => "DTVF",
       })
   }
 }
